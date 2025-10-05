@@ -1,8 +1,11 @@
 <template>
   <q-page padding>
     <div class="q-pa-md">
-      <div class="text-h4 text-center q-mb-md">AWS Cognito Authentication</div>
-      <div class="text-subtitle2 text-center text-grey-7 q-mb-xl">
+      <div class="text-h4 text-center q-mb-md">
+        <span class="text-pink">AWS Cognito</span>
+        <span class="text-white"> Authentication</span>
+      </div>
+      <div class="text-subtitle2 text-center text-grey-5 q-mb-xl">
         Explore different authentication methods powered by AWS Cognito
       </div>
 
@@ -14,9 +17,9 @@
           no-caps
           rounded
           unelevated
-          toggle-color="primary"
-          color="white"
-          text-color="primary"
+          toggle-color="pink"
+          color="grey-9"
+          text-color="white"
           :options="authMethodOptions"
           class="method-toggle"
         />
@@ -32,36 +35,37 @@
       <!-- Documentation Links -->
       <div class="row justify-center q-mt-xl">
         <div class="col-12 col-md-10">
-          <q-card flat bordered>
+          <q-card flat bordered class="bg-grey-9">
             <q-card-section>
               <div class="text-h6 q-mb-md">
-                <q-icon name="description" class="q-mr-sm" />
+                <q-icon name="description" color="pink" class="q-mr-sm" />
                 Deployment Documentation
               </div>
-              <div class="text-caption text-grey-7 q-mb-md">
+              <div class="text-caption text-grey-6 q-mb-md">
                 Step-by-step guides to deploy each auth type independently using
                 AWS CLI
               </div>
 
-              <q-list separator>
+              <q-list separator dark>
                 <q-item
                   clickable
                   v-ripple
                   :href="getDocLink('01-EMAIL-PASSWORD-AUTH.md')"
                   target="_blank"
+                  class="hover-pink"
                 >
                   <q-item-section avatar>
                     <q-avatar color="pink" text-color="white" icon="email" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>Email/Password Authentication</q-item-label>
-                    <q-item-label caption
+                    <q-item-label class="text-white">Email/Password Authentication</q-item-label>
+                    <q-item-label caption class="text-grey-5"
                       >Traditional email & password with
                       verification</q-item-label
                     >
                   </q-item-section>
                   <q-item-section side>
-                    <q-icon name="open_in_new" color="grey" />
+                    <q-icon name="open_in_new" color="grey-5" />
                   </q-item-section>
                 </q-item>
 
@@ -70,19 +74,20 @@
                   v-ripple
                   :href="getDocLink('02-PHONE-PASSWORD-AUTH.md')"
                   target="_blank"
+                  class="hover-pink"
                 >
                   <q-item-section avatar>
                     <q-avatar color="teal" text-color="white" icon="phone" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>Phone/Password Authentication</q-item-label>
-                    <q-item-label caption
+                    <q-item-label class="text-white">Phone/Password Authentication</q-item-label>
+                    <q-item-label caption class="text-grey-5"
                       >Login with phone number and password via
                       SMS</q-item-label
                     >
                   </q-item-section>
                   <q-item-section side>
-                    <q-icon name="open_in_new" color="grey" />
+                    <q-icon name="open_in_new" color="grey-5" />
                   </q-item-section>
                 </q-item>
 
@@ -91,6 +96,7 @@
                   v-ripple
                   :href="getDocLink('03-USERNAME-PASSWORD-AUTH.md')"
                   target="_blank"
+                  class="hover-pink"
                 >
                   <q-item-section avatar>
                     <q-avatar
@@ -100,15 +106,15 @@
                     />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label
+                    <q-item-label class="text-white"
                       >Username/Password Authentication</q-item-label
                     >
-                    <q-item-label caption
+                    <q-item-label caption class="text-grey-5"
                       >Classic username-based authentication</q-item-label
                     >
                   </q-item-section>
                   <q-item-section side>
-                    <q-icon name="open_in_new" color="grey" />
+                    <q-icon name="open_in_new" color="grey-5" />
                   </q-item-section>
                 </q-item>
 
@@ -117,18 +123,19 @@
                   v-ripple
                   :href="getDocLink('04-PASSWORDLESS-OTP-EMAIL.md')"
                   target="_blank"
+                  class="hover-pink"
                 >
                   <q-item-section avatar>
                     <q-avatar color="blue" text-color="white" icon="vpn_key" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>Passwordless Email OTP</q-item-label>
-                    <q-item-label caption
+                    <q-item-label class="text-white">Passwordless Email OTP</q-item-label>
+                    <q-item-label caption class="text-grey-5"
                       >Login with email OTP using Lambda triggers</q-item-label
                     >
                   </q-item-section>
                   <q-item-section side>
-                    <q-icon name="open_in_new" color="grey" />
+                    <q-icon name="open_in_new" color="grey-5" />
                   </q-item-section>
                 </q-item>
 
@@ -137,18 +144,19 @@
                   v-ripple
                   :href="getDocLink('05-PASSWORDLESS-OTP-SMS.md')"
                   target="_blank"
+                  class="hover-pink"
                 >
                   <q-item-section avatar>
                     <q-avatar color="orange" text-color="white" icon="sms" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>Passwordless SMS OTP</q-item-label>
-                    <q-item-label caption
+                    <q-item-label class="text-white">Passwordless SMS OTP</q-item-label>
+                    <q-item-label caption class="text-grey-5"
                       >Login with SMS OTP using Lambda triggers</q-item-label
                     >
                   </q-item-section>
                   <q-item-section side>
-                    <q-icon name="open_in_new" color="grey" />
+                    <q-icon name="open_in_new" color="grey-5" />
                   </q-item-section>
                 </q-item>
 
@@ -157,6 +165,7 @@
                   v-ripple
                   :href="getDocLink('06-MFA-SMS-AUTH.md')"
                   target="_blank"
+                  class="hover-pink"
                 >
                   <q-item-section avatar>
                     <q-avatar
@@ -166,15 +175,15 @@
                     />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label
+                    <q-item-label class="text-white"
                       >Multi-Factor Authentication (SMS)</q-item-label
                     >
-                    <q-item-label caption
+                    <q-item-label caption class="text-grey-5"
                       >Enhanced security with SMS-based MFA</q-item-label
                     >
                   </q-item-section>
                   <q-item-section side>
-                    <q-icon name="open_in_new" color="grey" />
+                    <q-icon name="open_in_new" color="grey-5" />
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -186,88 +195,88 @@
       <!-- Features Overview -->
       <div class="row justify-center q-mt-lg">
         <div class="col-12 col-md-10">
-          <q-card flat bordered class="bg-blue-9">
+          <q-card flat bordered class="bg-grey-9">
             <q-card-section>
-              <div class="text-h6 q-mb-md">
-                <q-icon name="stars" class="q-mr-sm" />
+              <div class="text-h6 q-mb-md text-white">
+                <q-icon name="stars" color="pink" class="q-mr-sm" />
                 Component Features
               </div>
               <div class="row q-col-gutter-md">
                 <div class="col-12 col-sm-6 col-md-4">
-                  <div class="text-subtitle2">
+                  <div class="text-subtitle2 text-white">
                     <q-icon
                       name="check_circle"
-                      color="positive"
+                      color="pink"
                       class="q-mr-xs"
                     />
                     Self-Contained
                   </div>
-                  <div class="text-caption text-grey-7">
+                  <div class="text-caption text-grey-5">
                     Each component is fully standalone with its own logic
                   </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                  <div class="text-subtitle2">
+                  <div class="text-subtitle2 text-white">
                     <q-icon
                       name="check_circle"
-                      color="positive"
+                      color="pink"
                       class="q-mr-xs"
                     />
                     Copy & Paste Ready
                   </div>
-                  <div class="text-caption text-grey-7">
+                  <div class="text-caption text-grey-5">
                     Easily reuse in other projects with minimal changes
                   </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                  <div class="text-subtitle2">
+                  <div class="text-subtitle2 text-white">
                     <q-icon
                       name="check_circle"
-                      color="positive"
+                      color="pink"
                       class="q-mr-xs"
                     />
                     Production Ready
                   </div>
-                  <div class="text-caption text-grey-7">
+                  <div class="text-caption text-grey-5">
                     Full error handling and user feedback
                   </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                  <div class="text-subtitle2">
+                  <div class="text-subtitle2 text-white">
                     <q-icon
                       name="check_circle"
-                      color="positive"
+                      color="pink"
                       class="q-mr-xs"
                     />
                     AWS Amplify
                   </div>
-                  <div class="text-caption text-grey-7">
+                  <div class="text-caption text-grey-5">
                     Uses official AWS Amplify library
                   </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                  <div class="text-subtitle2">
+                  <div class="text-subtitle2 text-white">
                     <q-icon
                       name="check_circle"
-                      color="positive"
+                      color="pink"
                       class="q-mr-xs"
                     />
                     Quasar UI
                   </div>
-                  <div class="text-caption text-grey-7">
+                  <div class="text-caption text-grey-5">
                     Beautiful components with Quasar framework
                   </div>
                 </div>
                 <div class="col-12 col-sm-6 col-md-4">
-                  <div class="text-subtitle2">
+                  <div class="text-subtitle2 text-white">
                     <q-icon
                       name="check_circle"
-                      color="positive"
+                      color="pink"
                       class="q-mr-xs"
                     />
                     TypeScript Support
                   </div>
-                  <div class="text-caption text-grey-7">
+                  <div class="text-caption text-grey-5">
                     Ready for TypeScript migration
                   </div>
                 </div>
@@ -344,7 +353,7 @@ const currentAuthComponent = computed(() => {
 function getDocLink(filename) {
   // In development, you might want to link to GitHub raw content or local docs server
   // For now, returning a placeholder - you can update this based on your deployment
-  return `https://github.com/yourusername/blueprint/blob/main/frontend/docs/cognito/${filename}`;
+  return `https://github.com/flunkout-dvlpr/blueprint/blob/master/frontend/docs/cognito/${filename}`;
 }
 </script>
 
@@ -357,5 +366,10 @@ function getDocLink(filename) {
   .method-toggle {
     flex-wrap: wrap;
   }
+}
+
+/* Hover effect for documentation items */
+.hover-pink:hover {
+  background-color: rgba(233, 30, 99, 0.1);
 }
 </style>
