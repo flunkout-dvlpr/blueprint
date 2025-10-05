@@ -78,17 +78,37 @@
         </div>
       </div>
 
-      <!-- Configuration File -->
+      <!-- Step 2: Create config folder and file -->
       <div class="row justify-center q-mb-lg">
         <div class="col-12 col-md-10">
           <q-card flat bordered class="bg-grey-9">
             <q-card-section>
               <div class="text-h6 q-mb-md text-white">
-                <q-icon name="settings" color="orange" class="q-mr-sm" />
-                Step 2: Create Configuration File
+                <q-icon name="folder" color="orange" class="q-mr-sm" />
+                Step 2: Create Config Folder & File
               </div>
               <p class="text-body2 text-grey-5 q-mb-md">
-                Create <code class="text-orange">src/config/amplify-config.js</code> to centralize your AWS configuration:
+                Create the config directory and Amplify configuration file:
+              </p>
+              <q-card flat bordered class="bg-grey-10 q-mb-md">
+                <q-card-section class="code-block">
+                  <pre class="text-white">mkdir -p src/config
+touch src/config/amplify-config.js</pre>
+                </q-card-section>
+                <q-card-actions>
+                  <q-btn
+                    flat
+                    dense
+                    icon="content_copy"
+                    color="orange"
+                    label="Copy"
+                    @click="copyToClipboard('mkdir -p src/config\ntouch src/config/amplify-config.js')"
+                  />
+                </q-card-actions>
+              </q-card>
+
+              <p class="text-body2 text-grey-5 q-mb-md">
+                Add the following content to <code class="text-orange">src/config/amplify-config.js</code>:
               </p>
               <q-card flat bordered class="bg-grey-10">
                 <q-card-section class="code-block">
@@ -110,17 +130,99 @@
         </div>
       </div>
 
-      <!-- Environment Variables -->
+      <!-- Step 3: Create Boot File (Quasar-specific) -->
+      <div class="row justify-center q-mb-lg">
+        <div class="col-12 col-md-10">
+          <q-card flat bordered class="bg-grey-9">
+            <q-card-section>
+              <div class="text-h6 q-mb-md text-white">
+                <q-icon name="rocket_launch" color="orange" class="q-mr-sm" />
+                Step 3: Create Quasar Boot File
+              </div>
+              <p class="text-body2 text-grey-5 q-mb-md">
+                Quasar uses boot files to run code before the app starts. Create
+                <code class="text-orange">src/boot/amplify.js</code>:
+              </p>
+              <q-card flat bordered class="bg-grey-10">
+                <q-card-section class="code-block">
+                  <pre class="text-white">{{ bootFileCode }}</pre>
+                </q-card-section>
+                <q-card-actions>
+                  <q-btn
+                    flat
+                    dense
+                    icon="content_copy"
+                    color="orange"
+                    label="Copy"
+                    @click="copyToClipboard(bootFileCode)"
+                  />
+                </q-card-actions>
+              </q-card>
+
+              <q-banner rounded class="bg-blue-1 text-blue-9 q-mt-md">
+                <template v-slot:avatar>
+                  <q-icon name="info" color="blue" />
+                </template>
+                Boot files are Quasar's way of running initialization code. They execute before your app's
+                root component is instantiated, making them perfect for configuring libraries like Amplify.
+              </q-banner>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+
+      <!-- Step 4: Update quasar.config.js -->
+      <div class="row justify-center q-mb-lg">
+        <div class="col-12 col-md-10">
+          <q-card flat bordered class="bg-grey-9">
+            <q-card-section>
+              <div class="text-h6 q-mb-md text-white">
+                <q-icon name="settings" color="orange" class="q-mr-sm" />
+                Step 4: Register Boot File in quasar.config.js
+              </div>
+              <p class="text-body2 text-grey-5 q-mb-md">
+                Add the boot file to the <code class="text-orange">boot</code> array in
+                <code class="text-orange">quasar.config.js</code>:
+              </p>
+              <q-card flat bordered class="bg-grey-10">
+                <q-card-section class="code-block">
+                  <pre class="text-white">{{ quasarConfigCode }}</pre>
+                </q-card-section>
+                <q-card-actions>
+                  <q-btn
+                    flat
+                    dense
+                    icon="content_copy"
+                    color="orange"
+                    label="Copy"
+                    @click="copyToClipboard(quasarConfigCode)"
+                  />
+                </q-card-actions>
+              </q-card>
+
+              <q-banner rounded class="bg-orange-1 text-orange-9 q-mt-md">
+                <template v-slot:avatar>
+                  <q-icon name="warning" color="orange" />
+                </template>
+                <strong>Important:</strong> Boot files are executed in the order they appear in the array.
+                Place <code>amplify</code> before other boot files that might need authentication.
+              </q-banner>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+
+      <!-- Step 5: Environment Variables -->
       <div class="row justify-center q-mb-lg">
         <div class="col-12 col-md-10">
           <q-card flat bordered class="bg-grey-9">
             <q-card-section>
               <div class="text-h6 q-mb-md text-white">
                 <q-icon name="vpn_key" color="orange" class="q-mr-sm" />
-                Step 3: Environment Variables
+                Step 5: Configure Environment Variables
               </div>
               <p class="text-body2 text-grey-5 q-mb-md">
-                Create a <code class="text-orange">.env</code> file in your project root with your AWS credentials:
+                Create a <code class="text-orange">.env</code> file in your frontend root directory:
               </p>
               <q-card flat bordered class="bg-grey-10">
                 <q-card-section class="code-block">
@@ -142,41 +244,16 @@
                 <template v-slot:avatar>
                   <q-icon name="warning" color="orange" />
                 </template>
-                <strong>Important:</strong> Never commit your <code>.env</code> file to version control!
-                Add it to your <code>.gitignore</code> file.
+                <div>
+                  <div><strong>Security Note:</strong></div>
+                  <ul class="q-mb-none">
+                    <li>Never commit your <code>.env</code> file to version control</li>
+                    <li>Add <code>.env</code> to your <code>.gitignore</code></li>
+                    <li>Use <code>.env.example</code> (already created) as a template for team members</li>
+                    <li>Quasar requires the <code>VITE_</code> prefix for environment variables</li>
+                  </ul>
+                </div>
               </q-banner>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
-
-      <!-- Initialize in App -->
-      <div class="row justify-center q-mb-lg">
-        <div class="col-12 col-md-10">
-          <q-card flat bordered class="bg-grey-9">
-            <q-card-section>
-              <div class="text-h6 q-mb-md text-white">
-                <q-icon name="code" color="orange" class="q-mr-sm" />
-                Step 4: Initialize Amplify
-              </div>
-              <p class="text-body2 text-grey-5 q-mb-md">
-                Update <code class="text-orange">src/main.js</code> to configure Amplify on app startup:
-              </p>
-              <q-card flat bordered class="bg-grey-10">
-                <q-card-section class="code-block">
-                  <pre class="text-white">{{ mainJsCode }}</pre>
-                </q-card-section>
-                <q-card-actions>
-                  <q-btn
-                    flat
-                    dense
-                    icon="content_copy"
-                    color="orange"
-                    label="Copy"
-                    @click="copyToClipboard(mainJsCode)"
-                  />
-                </q-card-actions>
-              </q-card>
             </q-card-section>
           </q-card>
         </div>
@@ -189,7 +266,7 @@
             <q-card-section>
               <div class="text-h6 q-mb-md text-white">
                 <q-icon name="play_arrow" color="orange" class="q-mr-sm" />
-                Step 5: Using Amplify Auth
+                Step 6: Using Amplify Auth
               </div>
               <p class="text-body2 text-grey-5 q-mb-md">
                 Example of using Amplify Auth in your components:
@@ -415,38 +492,48 @@ export const configureAmplify = () => {
 
 export default configureAmplify`
 
-const envVarsCode = `# AWS Region
+const bootFileCode = `import { boot } from 'quasar/wrappers'
+import { configureAmplify } from 'src/config/amplify-config'
+
+/**
+ * Boot file for AWS Amplify configuration
+ * This initializes Amplify before the app starts
+ */
+export default boot(({ app }) => {
+  // Configure Amplify with environment variables
+  configureAmplify()
+
+  console.log('🚀 Amplify boot file executed')
+})`
+
+const quasarConfigCode = `module.exports = configure(function (/* ctx */) {
+  return {
+    // ... other config
+
+    // Boot files - executed before app starts
+    boot: [
+      'amplify',  // ← Add this line
+      'axios'
+    ],
+
+    // ... rest of config
+  }
+})`
+
+const envVarsCode = `# AWS Region where your Cognito User Pool is located
 VITE_AWS_REGION=us-east-1
 
-# Cognito User Pool Configuration
+# Your Cognito User Pool ID (found in AWS Console)
+# Format: us-east-1_XXXXXXXXX
 VITE_USER_POOL_ID=us-east-1_XXXXXXXXX
+
+# Your Cognito User Pool Client ID (App Client ID)
+# Format: 26-character alphanumeric string
 VITE_USER_POOL_CLIENT_ID=XXXXXXXXXXXXXXXXXXXXXXXXXX
 
 # Optional: Additional service configurations
 # VITE_API_ENDPOINT=https://api.yourdomain.com
 # VITE_S3_BUCKET=your-bucket-name`
-
-const mainJsCode = `import { createApp } from 'vue'
-import { Quasar } from 'quasar'
-import router from './router'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-
-// Import Amplify configuration
-import { configureAmplify } from './config/amplify-config'
-
-// Configure Amplify before creating the app
-configureAmplify()
-
-const app = createApp(App)
-
-app.use(Quasar, {
-  /* Quasar config */
-})
-app.use(createPinia())
-app.use(router)
-
-app.mount('#app')`
 
 const usageExampleCode = `import { signUp, signIn, signOut, getCurrentUser } from 'aws-amplify/auth'
 
