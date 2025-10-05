@@ -137,6 +137,14 @@ export default defineComponent({
         ],
       },
       {
+        title: "AWS Amplify",
+        icon: "settings_input_antenna",
+        color: "orange",
+        path: "/amplify",
+        description: "AWS SDK setup and configuration",
+        features: ["Amplify setup", "Cognito integration", "Configuration guide"],
+      },
+      {
         title: "Cognito",
         icon: "account_circle",
         color: "pink",

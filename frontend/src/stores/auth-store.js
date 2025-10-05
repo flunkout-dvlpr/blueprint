@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { signUp, signIn, signOut, confirmSignUp, resetPassword, confirmResetPassword, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -28,121 +29,95 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
-    // Mock signup - simulates AWS Cognito SignUp
+    // Signup with AWS Amplify
     async signup(email, password, name) {
       this.loading = true
       this.error = null
 
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const { userId, isSignUpComplete, nextStep } = await signUp({
+          username: email,
+          password,
+          options: {
+            userAttributes: {
+              email,
+              name
+            }
+          }
+        })
 
-        // Mock validation
-        if (!email || !password || password.length < 8) {
-          throw new Error('Invalid input. Password must be at least 8 characters.')
-        }
-
-        // In real implementation, this would call:
-        // AWS.CognitoIdentityServiceProvider.signUp()
-        console.log('[Mock] Cognito SignUp:', { email, name })
-
-        // Mock successful signup response
-        const mockUser = {
-          email,
-          name,
-          sub: 'mock-user-' + Date.now(), // Cognito user ID
-          email_verified: false,
-          created_at: new Date().toISOString()
-        }
-
-        // Store user but not authenticated until email verified
-        this.user = mockUser
-        this.isAuthenticated = false
+        console.log('✅ Cognito SignUp successful:', { userId, isSignUpComplete, nextStep })
 
         return {
           success: true,
           message: 'Signup successful! Please check your email for verification code.',
-          userSub: mockUser.sub
+          userSub: userId,
+          nextStep
         }
       } catch (error) {
         this.error = error.message
+        console.error('❌ Signup error:', error)
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    // Mock login - simulates AWS Cognito Authentication
+    // Login with AWS Amplify
     async login(email, password) {
       this.loading = true
       this.error = null
 
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const { isSignedIn, nextStep } = await signIn({
+          username: email,
+          password
+        })
 
-        // Mock validation
-        if (!email || !password) {
-          throw new Error('Email and password are required')
-        }
+        console.log('✅ Cognito Login successful:', { isSignedIn, nextStep })
 
-        // Mock credentials check (in demo, any email/password works)
-        // In real implementation, this would call:
-        // AWS.CognitoIdentityServiceProvider.initiateAuth()
-        console.log('[Mock] Cognito Login:', { email })
+        // Fetch current user and session
+        const user = await getCurrentUser()
+        const session = await fetchAuthSession()
 
-        // Mock successful authentication response
-        const mockUser = {
-          email,
-          name: email.split('@')[0], // Extract name from email
-          sub: 'mock-user-' + email,
+        const userData = {
+          email: user.signInDetails?.loginId || email,
+          name: user.username,
+          sub: user.userId,
           email_verified: true,
-          phone_number_verified: false,
           created_at: new Date().toISOString()
         }
 
-        const mockTokens = {
-          accessToken: 'mock-access-token-' + Date.now(),
-          refreshToken: 'mock-refresh-token-' + Date.now(),
-          idToken: 'mock-id-token-' + Date.now(),
-          expiresIn: 3600 // 1 hour
-        }
-
         // Update state
-        this.user = mockUser
-        this.isAuthenticated = true
-        this.accessToken = mockTokens.accessToken
-        this.refreshToken = mockTokens.refreshToken
-        this.idToken = mockTokens.idToken
-
-        // Store in localStorage for persistence
-        localStorage.setItem('authUser', JSON.stringify(mockUser))
-        localStorage.setItem('authTokens', JSON.stringify(mockTokens))
+        this.user = userData
+        this.isAuthenticated = isSignedIn
+        this.accessToken = session.tokens?.accessToken?.toString()
+        this.refreshToken = session.tokens?.refreshToken?.toString()
+        this.idToken = session.tokens?.idToken?.toString()
 
         return {
           success: true,
           message: 'Login successful!',
-          user: mockUser
+          user: userData,
+          nextStep
         }
       } catch (error) {
         this.error = error.message
+        console.error('❌ Login error:', error)
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    // Mock logout
+    // Logout with AWS Amplify
     async logout() {
       this.loading = true
 
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 500))
+        await signOut()
 
-        // In real implementation, this would call:
-        // AWS.CognitoIdentityServiceProvider.globalSignOut()
-        console.log('[Mock] Cognito Logout')
+        console.log('✅ Cognito Logout successful')
 
         // Clear state
         this.user = null
@@ -152,99 +127,82 @@ export const useAuthStore = defineStore('auth', {
         this.idToken = null
         this.error = null
 
-        // Clear localStorage
-        localStorage.removeItem('authUser')
-        localStorage.removeItem('authTokens')
-
         return { success: true, message: 'Logged out successfully' }
       } catch (error) {
         this.error = error.message
+        console.error('❌ Logout error:', error)
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    // Mock verify email with code
+    // Verify email with AWS Amplify
     async verifyEmail(email, code) {
       this.loading = true
       this.error = null
 
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const { isSignUpComplete, nextStep } = await confirmSignUp({
+          username: email,
+          confirmationCode: code
+        })
 
-        // Mock validation
-        if (!code || code.length !== 6) {
-          throw new Error('Invalid verification code. Must be 6 digits.')
-        }
-
-        // In real implementation, this would call:
-        // AWS.CognitoIdentityServiceProvider.confirmSignUp()
-        console.log('[Mock] Cognito Verify Email:', { email, code })
-
-        // Update user email_verified status
-        if (this.user) {
-          this.user.email_verified = true
-        }
+        console.log('✅ Email verified:', { isSignUpComplete, nextStep })
 
         return {
           success: true,
-          message: 'Email verified successfully! You can now log in.'
+          message: 'Email verified successfully! You can now log in.',
+          isSignUpComplete,
+          nextStep
         }
       } catch (error) {
         this.error = error.message
+        console.error('❌ Email verification error:', error)
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    // Mock password reset request
+    // Request password reset with AWS Amplify
     async requestPasswordReset(email) {
       this.loading = true
       this.error = null
 
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        const output = await resetPassword({ username: email })
+        const { nextStep } = output
 
-        // In real implementation, this would call:
-        // AWS.CognitoIdentityServiceProvider.forgotPassword()
-        console.log('[Mock] Cognito Password Reset Request:', { email })
+        console.log('✅ Password reset requested:', nextStep)
 
         return {
           success: true,
-          message: 'Password reset code sent to your email.'
+          message: 'Password reset code sent to your email.',
+          nextStep
         }
       } catch (error) {
         this.error = error.message
+        console.error('❌ Password reset request error:', error)
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    // Mock confirm password reset
+    // Confirm password reset with AWS Amplify
     async confirmPasswordReset(email, code, newPassword) {
       this.loading = true
       this.error = null
 
       try {
-        // Simulate API call delay
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await confirmResetPassword({
+          username: email,
+          confirmationCode: code,
+          newPassword
+        })
 
-        // Mock validation
-        if (!code || code.length !== 6) {
-          throw new Error('Invalid verification code')
-        }
-        if (!newPassword || newPassword.length < 8) {
-          throw new Error('Password must be at least 8 characters')
-        }
-
-        // In real implementation, this would call:
-        // AWS.CognitoIdentityServiceProvider.confirmForgotPassword()
-        console.log('[Mock] Cognito Confirm Password Reset:', { email })
+        console.log('✅ Password reset confirmed')
 
         return {
           success: true,
@@ -252,32 +210,40 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (error) {
         this.error = error.message
+        console.error('❌ Password reset confirmation error:', error)
         throw error
       } finally {
         this.loading = false
       }
     },
 
-    // Restore session from localStorage
-    restoreSession() {
+    // Restore session using AWS Amplify
+    async restoreSession() {
       try {
-        const storedUser = localStorage.getItem('authUser')
-        const storedTokens = localStorage.getItem('authTokens')
+        const user = await getCurrentUser()
+        const session = await fetchAuthSession()
 
-        if (storedUser && storedTokens) {
-          this.user = JSON.parse(storedUser)
-          const tokens = JSON.parse(storedTokens)
-          this.accessToken = tokens.accessToken
-          this.refreshToken = tokens.refreshToken
-          this.idToken = tokens.idToken
+        if (user && session.tokens) {
+          const userData = {
+            email: user.signInDetails?.loginId || user.username,
+            name: user.username,
+            sub: user.userId,
+            email_verified: true,
+            created_at: new Date().toISOString()
+          }
+
+          this.user = userData
           this.isAuthenticated = true
+          this.accessToken = session.tokens?.accessToken?.toString()
+          this.refreshToken = session.tokens?.refreshToken?.toString()
+          this.idToken = session.tokens?.idToken?.toString()
 
-          console.log('[Mock] Session restored from localStorage')
+          console.log('✅ Session restored from Amplify')
           return true
         }
         return false
       } catch (error) {
-        console.error('Error restoring session:', error)
+        console.log('ℹ️ No active session to restore')
         return false
       }
     },
@@ -627,11 +593,13 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Verify OTP from SMS
-    async verifyOTPSMS(phoneNumber, code) {
+    async verifyOTPSMS(code) {
       this.loading = true
       this.error = null
 
       try {
+        // Note: For passwordless SMS OTP with Cognito, this would require custom Lambda triggers
+        // For now, keeping as mock since it requires specific Cognito User Pool configuration
         await new Promise(resolve => setTimeout(resolve, 1000))
 
         if (!code || code.length !== 6) {
@@ -642,12 +610,20 @@ export const useAuthStore = defineStore('auth', {
           throw new Error('No active OTP session. Please request a new code.')
         }
 
-        console.log('[Mock] Cognito Verify OTP SMS:', { phoneNumber, code })
+        console.log('[Mock] Cognito Verify OTP SMS:', { code })
+
+        // This would use Amplify's signIn with CUSTOM_AUTH flow
+        // const { isSignedIn } = await signIn({
+        //   username: phoneNumber,
+        //   options: {
+        //     authFlowType: 'CUSTOM_AUTH'
+        //   }
+        // })
 
         const mockUser = {
-          phone_number: phoneNumber,
-          name: phoneNumber.substring(0, 10),
-          sub: 'mock-user-otp-sms-' + phoneNumber,
+          phone_number: '+1234567890',
+          name: 'SMS User',
+          sub: 'mock-user-otp-sms-' + Date.now(),
           phone_number_verified: true,
           auth_type: 'passwordless_sms',
           created_at: new Date().toISOString()
@@ -667,9 +643,6 @@ export const useAuthStore = defineStore('auth', {
         this.idToken = mockTokens.idToken
         this.otpSession = null
         this.otpDeliveryMedium = null
-
-        localStorage.setItem('authUser', JSON.stringify(mockUser))
-        localStorage.setItem('authTokens', JSON.stringify(mockTokens))
 
         return {
           success: true,

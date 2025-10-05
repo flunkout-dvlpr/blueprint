@@ -6,6 +6,7 @@ const routes = [
     children: [
       { path: '', component: () => import('pages/IndexPage.vue') },
       { path: '/quasar-vue', component: () => import('pages/QuasarVuePage.vue') },
+      { path: '/amplify', component: () => import('pages/AmplifyPage.vue') },
       { path: '/cognito', component: () => import('pages/CognitoPage.vue') },
       { path: '/sns', component: () => import('pages/SnsPage.vue') },
       { path: '/api-gateway', component: () => import('pages/ApiGatewayPage.vue') },

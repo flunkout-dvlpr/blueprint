@@ -72,6 +72,13 @@ const awsServicesList = [
     path: '/quasar-vue'
   },
   {
+    title: 'AWS Amplify',
+    caption: 'SDK Setup & Configuration',
+    icon: 'settings_input_antenna',
+    color: 'orange',
+    path: '/amplify'
+  },
+  {
     title: 'Cognito',
     caption: 'Authentication & User Management',
     icon: 'account_circle',
