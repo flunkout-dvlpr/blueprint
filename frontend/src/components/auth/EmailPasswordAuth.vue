@@ -36,7 +36,7 @@
               outlined
               dense
               class="q-mb-md"
-              :rules="[val => !!val || 'Email is required']"
+              :rules="[(val) => !!val || 'Email is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="email" />
@@ -50,7 +50,7 @@
               outlined
               dense
               class="q-mb-md"
-              :rules="[val => !!val || 'Password is required']"
+              :rules="[(val) => !!val || 'Password is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="lock" />
@@ -83,7 +83,7 @@
               outlined
               dense
               class="q-mb-md"
-              :rules="[val => !!val || 'Name is required']"
+              :rules="[(val) => !!val || 'Name is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="person" />
@@ -97,7 +97,7 @@
               outlined
               dense
               class="q-mb-md"
-              :rules="[val => !!val || 'Email is required']"
+              :rules="[(val) => !!val || 'Email is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="email" />
@@ -112,8 +112,9 @@
               dense
               class="q-mb-md"
               :rules="[
-                val => !!val || 'Password is required',
-                val => val.length >= 8 || 'Password must be at least 8 characters'
+                (val) => !!val || 'Password is required',
+                (val) =>
+                  val.length >= 8 || 'Password must be at least 8 characters',
               ]"
             >
               <template v-slot:prepend>
@@ -148,7 +149,7 @@
               outlined
               dense
               class="q-mb-md"
-              :rules="[val => !!val || 'Email is required']"
+              :rules="[(val) => !!val || 'Email is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="email" />
@@ -161,7 +162,7 @@
               outlined
               dense
               class="q-mb-md"
-              :rules="[val => !!val || 'Code is required']"
+              :rules="[(val) => !!val || 'Code is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="pin" />
@@ -189,7 +190,7 @@
 
         <!-- Reset Password Panel -->
         <q-tab-panel name="reset">
-          <q-form @submit="resetStep === 1 ? handleRequestReset : handleConfirmReset">
+          <q-form @submit="handleResetSubmit">
             <q-input
               v-model="resetForm.email"
               label="Email"
@@ -197,7 +198,7 @@
               outlined
               dense
               class="q-mb-md"
-              :rules="[val => !!val || 'Email is required']"
+              :rules="[(val) => !!val || 'Email is required']"
             >
               <template v-slot:prepend>
                 <q-icon name="email" />
@@ -211,7 +212,7 @@
                 outlined
                 dense
                 class="q-mb-md"
-                :rules="[val => !!val || 'Code is required']"
+                :rules="[(val) => !!val || 'Code is required']"
               >
                 <template v-slot:prepend>
                   <q-icon name="pin" />
@@ -226,8 +227,9 @@
                 dense
                 class="q-mb-md"
                 :rules="[
-                  val => !!val || 'Password is required',
-                  val => val.length >= 8 || 'Password must be at least 8 characters'
+                  (val) => !!val || 'Password is required',
+                  (val) =>
+                    val.length >= 8 || 'Password must be at least 8 characters',
                 ]"
               >
                 <template v-slot:prepend>
@@ -264,11 +266,11 @@
       <div class="text-caption">
         <strong>Verified:</strong>
         <q-chip
-          :color="user.emailVerified ? 'green' : 'orange'"
+          :color="user.email_verified ? 'green' : 'orange'"
           text-color="white"
           size="sm"
         >
-          {{ user.emailVerified ? 'Yes' : 'No' }}
+          {{ user.email_verified ? "Yes" : "No" }}
         </q-chip>
       </div>
       <q-btn
@@ -282,201 +284,211 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useQuasar } from 'quasar'
-import { useAuthStore } from 'src/stores/auth-store'
+import { ref, computed } from "vue";
+import { useQuasar } from "quasar";
+import { useAuthStore } from "src/stores/auth-store";
 
-const $q = useQuasar()
-const authStore = useAuthStore()
+const $q = useQuasar();
+const authStore = useAuthStore();
 
 // Component state
-const activeTab = ref('login')
-const showPassword = ref(false)
-const loading = ref(false)
-const resetStep = ref(1) // 1 = request code, 2 = confirm reset
+const activeTab = ref("login");
+const showPassword = ref(false);
+const loading = ref(false);
+const resetStep = ref(1); // 1 = request code, 2 = confirm reset
 
 // Forms
 const loginForm = ref({
-  email: '',
-  password: ''
-})
+  email: "",
+  password: "",
+});
 
 const signupForm = ref({
-  email: '',
-  password: '',
-  name: ''
-})
+  email: "",
+  password: "",
+  name: "",
+});
 
 const verifyForm = ref({
-  email: '',
-  code: ''
-})
+  email: "",
+  code: "",
+});
 
 const resetForm = ref({
-  email: '',
-  code: '',
-  newPassword: ''
-})
+  email: "",
+  code: "",
+  newPassword: "",
+});
 
 // Computed
-const user = computed(() => authStore.user)
+const user = computed(() => authStore.user);
 
 // Methods
 async function handleLogin() {
-  loading.value = true
+  loading.value = true;
   try {
-    await authStore.login(loginForm.value.email, loginForm.value.password)
+    await authStore.login(loginForm.value.email, loginForm.value.password);
     $q.notify({
-      type: 'positive',
-      message: 'Login successful!',
-      position: 'top'
-    })
+      type: "positive",
+      message: "Login successful!",
+      position: "top",
+    });
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: error.message || 'Login failed',
-      position: 'top'
-    })
+      type: "negative",
+      message: error.message || "Login failed",
+      position: "top",
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function handleSignup() {
-  loading.value = true
+  loading.value = true;
   try {
     await authStore.signup(
       signupForm.value.email,
       signupForm.value.password,
       signupForm.value.name
-    )
+    );
     $q.notify({
-      type: 'positive',
-      message: 'Account created! Please check your email for verification code.',
-      position: 'top'
-    })
+      type: "positive",
+      message:
+        "Account created! Please check your email for verification code.",
+      position: "top",
+    });
     // Switch to verify tab
-    verifyForm.value.email = signupForm.value.email
-    activeTab.value = 'verify'
+    verifyForm.value.email = signupForm.value.email;
+    activeTab.value = "verify";
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: error.message || 'Signup failed',
-      position: 'top'
-    })
+      type: "negative",
+      message: error.message || "Signup failed",
+      position: "top",
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function handleVerifyEmail() {
-  loading.value = true
+  loading.value = true;
   try {
-    await authStore.verifyEmail(verifyForm.value.email, verifyForm.value.code)
+    await authStore.verifyEmail(verifyForm.value.email, verifyForm.value.code);
     $q.notify({
-      type: 'positive',
-      message: 'Email verified! You can now login.',
-      position: 'top'
-    })
-    activeTab.value = 'login'
-    loginForm.value.email = verifyForm.value.email
+      type: "positive",
+      message: "Email verified! You can now login.",
+      position: "top",
+    });
+    activeTab.value = "login";
+    loginForm.value.email = verifyForm.value.email;
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: error.message || 'Verification failed',
-      position: 'top'
-    })
+      type: "negative",
+      message: error.message || "Verification failed",
+      position: "top",
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function handleResendCode() {
-  loading.value = true
+  loading.value = true;
   try {
-    await authStore.resendCode(verifyForm.value.email)
+    await authStore.resendCode(verifyForm.value.email);
     $q.notify({
-      type: 'positive',
-      message: 'Verification code resent!',
-      position: 'top'
-    })
+      type: "positive",
+      message: "Verification code resent!",
+      position: "top",
+    });
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: error.message || 'Failed to resend code',
-      position: 'top'
-    })
+      type: "negative",
+      message: error.message || "Failed to resend code",
+      position: "top",
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
+  }
+}
+
+function handleResetSubmit() {
+  if (resetStep.value === 1) {
+    handleRequestReset();
+  } else {
+    handleConfirmReset();
   }
 }
 
 async function handleRequestReset() {
-  loading.value = true
+  console.log("we hit handleRequestReset");
+  loading.value = true;
   try {
-    await authStore.requestPasswordReset(resetForm.value.email)
+    await authStore.requestPasswordReset(resetForm.value.email);
     $q.notify({
-      type: 'positive',
-      message: 'Reset code sent to your email!',
-      position: 'top'
-    })
-    resetStep.value = 2
+      type: "positive",
+      message: "Reset code sent to your email!",
+      position: "top",
+    });
+    resetStep.value = 2;
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: error.message || 'Failed to request reset',
-      position: 'top'
-    })
+      type: "negative",
+      message: error.message || "Failed to request reset",
+      position: "top",
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function handleConfirmReset() {
-  loading.value = true
+  loading.value = true;
   try {
     await authStore.confirmPasswordReset(
       resetForm.value.email,
       resetForm.value.code,
       resetForm.value.newPassword
-    )
+    );
     $q.notify({
-      type: 'positive',
-      message: 'Password reset successful! You can now login.',
-      position: 'top'
-    })
-    activeTab.value = 'login'
-    loginForm.value.email = resetForm.value.email
-    resetStep.value = 1
-    resetForm.value = { email: '', code: '', newPassword: '' }
+      type: "positive",
+      message: "Password reset successful! You can now login.",
+      position: "top",
+    });
+    activeTab.value = "login";
+    loginForm.value.email = resetForm.value.email;
+    resetStep.value = 1;
+    resetForm.value = { email: "", code: "", newPassword: "" };
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: error.message || 'Failed to reset password',
-      position: 'top'
-    })
+      type: "negative",
+      message: error.message || "Failed to reset password",
+      position: "top",
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function handleLogout() {
   try {
-    await authStore.logout()
+    await authStore.logout();
     $q.notify({
-      type: 'info',
-      message: 'Logged out successfully',
-      position: 'top'
-    })
+      type: "info",
+      message: "Logged out successfully",
+      position: "top",
+    });
     // Reset forms
-    loginForm.value = { email: '', password: '' }
-    activeTab.value = 'login'
+    loginForm.value = { email: "", password: "" };
+    activeTab.value = "login";
   } catch (error) {
     $q.notify({
-      type: 'negative',
-      message: error.message || 'Logout failed',
-      position: 'top'
-    })
+      type: "negative",
+      message: error.message || "Logout failed",
+      position: "top",
+    });
   }
 }
 </script>
