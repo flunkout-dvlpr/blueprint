@@ -1,70 +1,51 @@
 # Email/Password Authentication with AWS Cognito
 
+> **Note:** This guide uses PowerShell commands. For bash/Linux commands, please refer to the original documentation.
+
 Complete self-contained guide to deploy email/password authentication using AWS Cognito.
 
 ## Use Case
+
 Traditional email and password authentication with email verification.
 
 ## What You'll Deploy
+
 - ✅ Cognito User Pool configured for email login
 - ✅ Email verification flow
 - ✅ Password reset capability
 - ✅ App client for web application
 
 ## Prerequisites
+
 - AWS CLI installed and configured
 - An AWS account with appropriate permissions
 - Node.js project for frontend integration
+- PowerShell 5.1 or later
 
 ---
 
 ## Step 1: Create User Pool
 
-```bash
-# Set variables
-REGION="us-east-1"
-POOL_NAME="email-password-pool"
+```powershell
+set REGION=us-east-1
+set POOL_NAME=email-password-pool
 
-# Create User Pool
-aws cognito-idp create-user-pool \
-  --pool-name $POOL_NAME \
-  --region $REGION \
-  --policies '{
-    "PasswordPolicy": {
-      "MinimumLength": 8,
-      "RequireUppercase": true,
-      "RequireLowercase": true,
-      "RequireNumbers": true,
-      "RequireSymbols": false
-    }
-  }' \
-  --username-attributes email \
-  --auto-verified-attributes email \
-  --email-configuration '{
-    "EmailSendingAccount": "COGNITO_DEFAULT"
-  }' \
-  --username-configuration '{
-    "CaseSensitive": false
-  }' \
-  --schema '[
-    {
-      "Name": "email",
-      "AttributeDataType": "String",
-      "Mutable": true,
-      "Required": true
-    },
-    {
-      "Name": "name",
-      "AttributeDataType": "String",
-      "Mutable": true,
-      "Required": true
-    }
-  ]' \
-  --query 'UserPool.Id' \
-  --output text
+aws cognito-idp create-user-pool ^
+--pool-name %POOL_NAME% ^
+--region %REGION% ^
+--policies "{\"PasswordPolicy\":{\"MinimumLength\":8,\"RequireUppercase\":true,\"RequireLowercase\":true,\"RequireNumbers\":true,\"RequireSymbols\":false}}" ^
+--username-attributes email ^
+--auto-verified-attributes email ^
+--email-configuration "{\"EmailSendingAccount\":\"COGNITO_DEFAULT\"}" ^
+--username-configuration "{\"CaseSensitive\":false}" ^
+--schema "[{\"Name\":\"email\",\"AttributeDataType\":\"String\",\"Mutable\":true,\"Required\":true},{\"Name\":\"name\",\"AttributeDataType\":\"String\",\"Mutable\":true,\"Required\":true}]" ^
+--query "UserPool.Id" ^
+--output text
+
 ```
 
 **Save the output (User Pool ID):**
+
 ```
 us-east-1_XXXXXXXXX
 ```
@@ -73,35 +54,28 @@ us-east-1_XXXXXXXXX
 
 ## Step 2: Create App Client
 
-```bash
-# Set variables
-USER_POOL_ID="us-east-1_XXXXXXXXX"  # From Step 1
+```powershell
+set USER_POOL_ID=us-east-1_XXXXXXXXX
 
-# Create App Client
-aws cognito-idp create-user-pool-client \
-  --user-pool-id $USER_POOL_ID \
-  --client-name email-password-client \
-  --no-generate-secret \
-  --explicit-auth-flows \
-    ALLOW_USER_PASSWORD_AUTH \
-    ALLOW_REFRESH_TOKEN_AUTH \
-    ALLOW_USER_SRP_AUTH \
-  --prevent-user-existence-errors ENABLED \
-  --enable-token-revocation \
-  --auth-session-validity 3 \
-  --access-token-validity 60 \
-  --id-token-validity 60 \
-  --refresh-token-validity 30 \
-  --token-validity-units '{
-    "AccessToken": "minutes",
-    "IdToken": "minutes",
-    "RefreshToken": "days"
-  }' \
-  --query 'UserPoolClient.ClientId' \
-  --output text
+aws cognito-idp create-user-pool-client ^
+--user-pool-id %USER_POOL_ID% ^
+--client-name email-password-client ^
+--no-generate-secret ^
+--explicit-auth-flows ALLOW_USER_PASSWORD_AUTH ALLOW_REFRESH_TOKEN_AUTH ALLOW_USER_SRP_AUTH ^
+--prevent-user-existence-errors ENABLED ^
+--enable-token-revocation ^
+--auth-session-validity 3 ^
+--access-token-validity 60 ^
+--id-token-validity 60 ^
+--refresh-token-validity 30 ^
+--token-validity-units "{\"AccessToken\":\"minutes\",\"IdToken\":\"minutes\",\"RefreshToken\":\"days\"}" ^
+--query "UserPoolClient.ClientId" ^
+--output text
+
 ```
 
 **Save the output (App Client ID):**
+
 ```
 XXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
@@ -138,7 +112,7 @@ yarn add aws-amplify
 Create `src/config/cognito-email-auth.js`:
 
 ```javascript
-import { Amplify } from 'aws-amplify'
+import { Amplify } from "aws-amplify";
 
 export const configureEmailAuth = () => {
   Amplify.configure({
@@ -149,7 +123,7 @@ export const configureEmailAuth = () => {
         userPoolClientId: import.meta.env.VITE_EMAIL_AUTH_CLIENT_ID,
 
         loginWith: {
-          email: true
+          email: true,
         },
 
         passwordFormat: {
@@ -157,12 +131,12 @@ export const configureEmailAuth = () => {
           requireLowercase: true,
           requireUppercase: true,
           requireNumbers: true,
-          requireSpecialCharacters: false
-        }
-      }
-    }
-  })
-}
+          requireSpecialCharacters: false,
+        },
+      },
+    },
+  });
+};
 ```
 
 ---
@@ -170,8 +144,9 @@ export const configureEmailAuth = () => {
 ## Step 6: Implementation Code
 
 ### Sign Up
+
 ```javascript
-import { signUp } from 'aws-amplify/auth'
+import { signUp } from "aws-amplify/auth";
 
 async function signup(email, password, name) {
   try {
@@ -180,96 +155,103 @@ async function signup(email, password, name) {
       password,
       attributes: {
         email,
-        name
-      }
-    })
+        name,
+      },
+    });
 
-    console.log('User ID:', userId)
-    console.log('Next step:', nextStep)
+    console.log("User ID:", userId);
+    console.log("Next step:", nextStep);
 
-    return { success: true, userId }
+    return { success: true, userId };
   } catch (error) {
-    console.error('Sign up error:', error)
-    throw error
+    console.error("Sign up error:", error);
+    throw error;
   }
 }
 ```
 
 ### Confirm Sign Up (Email Verification)
+
 ```javascript
-import { confirmSignUp } from 'aws-amplify/auth'
+import { confirmSignUp } from "aws-amplify/auth";
 
 async function confirmEmail(email, code) {
   try {
     const { isSignUpComplete } = await confirmSignUp({
       username: email,
-      confirmationCode: code
-    })
+      confirmationCode: code,
+    });
 
-    console.log('Sign up confirmed:', isSignUpComplete)
-    return { success: true }
+    console.log("Sign up confirmed:", isSignUpComplete);
+    return { success: true };
   } catch (error) {
-    console.error('Confirmation error:', error)
-    throw error
+    console.error("Confirmation error:", error);
+    throw error;
   }
 }
 ```
 
 ### Sign In
+
 ```javascript
-import { signIn } from 'aws-amplify/auth'
+import { signIn } from "aws-amplify/auth";
 
 async function login(email, password) {
   try {
     const { isSignedIn, nextStep } = await signIn({
       username: email,
-      password
-    })
+      password,
+    });
 
-    console.log('Signed in:', isSignedIn)
-    return { success: true, isSignedIn }
+    console.log("Signed in:", isSignedIn);
+    return { success: true, isSignedIn };
   } catch (error) {
-    console.error('Sign in error:', error)
-    throw error
+    console.error("Sign in error:", error);
+    throw error;
   }
 }
 ```
 
 ### Get Current User
+
 ```javascript
-import { fetchUserAttributes, getCurrentUser } from 'aws-amplify/auth'
+import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 
 async function getCurrentUserInfo() {
   try {
-    const user = await getCurrentUser()
-    const attributes = await fetchUserAttributes()
+    const user = await getCurrentUser();
+    const attributes = await fetchUserAttributes();
 
     return {
       userId: user.userId,
       username: user.username,
       email: attributes.email,
       name: attributes.name,
-      emailVerified: attributes.email_verified === 'true'
-    }
+      emailVerified: attributes.email_verified === "true",
+    };
   } catch (error) {
-    console.error('Get user error:', error)
-    throw error
+    console.error("Get user error:", error);
+    throw error;
   }
 }
 ```
 
 ### Password Reset
+
 ```javascript
-import { resetPassword, confirmResetPassword } from 'aws-amplify/auth'
+import { resetPassword, confirmResetPassword } from "aws-amplify/auth";
 
 async function requestPasswordReset(email) {
   try {
-    const output = await resetPassword({ username: email })
-    console.log('Reset code sent to:', output.nextStep.codeDeliveryDetails.destination)
-    return { success: true }
+    const output = await resetPassword({ username: email });
+    console.log(
+      "Reset code sent to:",
+      output.nextStep.codeDeliveryDetails.destination
+    );
+    return { success: true };
   } catch (error) {
-    console.error('Reset request error:', error)
-    throw error
+    console.error("Reset request error:", error);
+    throw error;
   }
 }
 
@@ -278,27 +260,28 @@ async function confirmPasswordReset(email, code, newPassword) {
     await confirmResetPassword({
       username: email,
       confirmationCode: code,
-      newPassword
-    })
-    return { success: true }
+      newPassword,
+    });
+    return { success: true };
   } catch (error) {
-    console.error('Reset confirmation error:', error)
-    throw error
+    console.error("Reset confirmation error:", error);
+    throw error;
   }
 }
 ```
 
 ### Sign Out
+
 ```javascript
-import { signOut } from 'aws-amplify/auth'
+import { signOut } from "aws-amplify/auth";
 
 async function logout() {
   try {
-    await signOut()
-    return { success: true }
+    await signOut();
+    return { success: true };
   } catch (error) {
-    console.error('Sign out error:', error)
-    throw error
+    console.error("Sign out error:", error);
+    throw error;
   }
 }
 ```
@@ -308,30 +291,33 @@ async function logout() {
 ## Step 7: Test the Setup
 
 ### Test Sign Up via CLI
-```bash
-USER_POOL_ID="us-east-1_XXXXXXXXX"
-CLIENT_ID="XXXXXXXXXXXXXXXXXXXXXXXXXX"
 
-aws cognito-idp sign-up \
-  --client-id $CLIENT_ID \
-  --username user@example.com \
-  --password "TestPass123" \
+```powershell
+$USER_POOL_ID = "us-east-1_XXXXXXXXX"
+$CLIENT_ID = "XXXXXXXXXXXXXXXXXXXXXXXXXX"
+
+aws cognito-idp sign-up `
+  --client-id $CLIENT_ID `
+  --username user@example.com `
+  --password "TestPass123" `
   --user-attributes Name=email,Value=user@example.com Name=name,Value="Test User"
 ```
 
 ### Verify Email
-```bash
-aws cognito-idp confirm-sign-up \
-  --client-id $CLIENT_ID \
-  --username user@example.com \
+
+```powershell
+aws cognito-idp confirm-sign-up `
+  --client-id $CLIENT_ID `
+  --username user@example.com `
   --confirmation-code "123456"
 ```
 
 ### Test Sign In
-```bash
-aws cognito-idp initiate-auth \
-  --auth-flow USER_PASSWORD_AUTH \
-  --client-id $CLIENT_ID \
+
+```powershell
+aws cognito-idp initiate-auth `
+  --auth-flow USER_PASSWORD_AUTH `
+  --client-id $CLIENT_ID `
   --auth-parameters USERNAME=user@example.com,PASSWORD="TestPass123"
 ```
 
@@ -339,14 +325,14 @@ aws cognito-idp initiate-auth \
 
 ## Cleanup / Teardown
 
-```bash
+```powershell
 # Delete App Client
-aws cognito-idp delete-user-pool-client \
-  --user-pool-id $USER_POOL_ID \
+aws cognito-idp delete-user-pool-client `
+  --user-pool-id $USER_POOL_ID `
   --client-id $CLIENT_ID
 
 # Delete User Pool
-aws cognito-idp delete-user-pool \
+aws cognito-idp delete-user-pool `
   --user-pool-id $USER_POOL_ID
 ```
 
@@ -355,26 +341,32 @@ aws cognito-idp delete-user-pool \
 ## Troubleshooting
 
 ### Email not receiving verification code
+
 **Solution:** Check spam folder, or configure custom email with SES:
-```bash
-aws cognito-idp update-user-pool \
-  --user-pool-id $USER_POOL_ID \
+
+```powershell
+aws cognito-idp update-user-pool `
+  --user-pool-id $USER_POOL_ID `
   --email-configuration SourceArn=arn:aws:ses:REGION:ACCOUNT:identity/noreply@yourdomain.com,EmailSendingAccount=DEVELOPER
 ```
 
 ### Invalid password error
+
 **Check password policy:**
-```bash
-aws cognito-idp describe-user-pool \
-  --user-pool-id $USER_POOL_ID \
+
+```powershell
+aws cognito-idp describe-user-pool `
+  --user-pool-id $USER_POOL_ID `
   --query 'UserPool.Policies.PasswordPolicy'
 ```
 
 ### User not confirmed
+
 **Admin confirm user (for testing):**
-```bash
-aws cognito-idp admin-confirm-sign-up \
-  --user-pool-id $USER_POOL_ID \
+
+```powershell
+aws cognito-idp admin-confirm-sign-up `
+  --user-pool-id $USER_POOL_ID `
   --username user@example.com
 ```
 
